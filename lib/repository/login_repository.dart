@@ -65,12 +65,15 @@ class LoginRepository extends ChangeNotifier{
     bool didAuthenticate = await _localAuth.authenticateWithBiometrics(
     localizedReason: 'Please authenticate to show account balance');
     if (didAuthenticate){
-     if (await _services.ping(_user.token, user.rut)){
-       _status = Status.Authorized;
-       notifyListeners();
-       return true;
-     }
-     return false;
+      if (await _services.ping(_user.token, user.rut)){
+        _status = Status.Authorized;
+        notifyListeners();
+        return true;
+      }
+      final password = await _storage.read(key: 'password');
+      final signin = await signIn(_user.rut, password);
+      
+      return signin;
     }else{
       print('NOK');
       return false;
